@@ -1,6 +1,8 @@
 import { Entity } from './entity/entity.js';
 import { HomeAssistantDevice } from '../devices/home-assistant-device.js';
 import { LightDevice } from '../devices/light-device.js';
+import { CoverDevice } from '../devices/cover-device.js';
+
 import { SwitchDevice } from '../devices/switch-device.js';
 import { HomeAssistantClient, UnsubscribeFn } from './home-assistant-client.js';
 import { AnsiLogger, TimestampFormat } from 'node-ansi-logger';
@@ -25,6 +27,7 @@ export class HomeAssistantMatterAdapter {
     scene: (entity) => new SwitchDevice(this.client, entity),
     script: (entity) => new SwitchDevice(this.client, entity),
     automation: (entity) => new SwitchDevice(this.client, entity),
+    cover: (entity) => new CoverDevice(this.client, entity),
     // climate: (entity) => new ClimateDevice(this.client, entity),
   };
 

@@ -22,7 +22,7 @@
     "serve": "dotenvx run -f .env.local -- matterbridge -bridge"
   },
   "devDependencies": {
-    "@dotenvx/dotenvx": "^0.45.0",
+    "@dotenvx/dotenvx": "^1.0.0",
     "@eslint/js": "^9.4.0",
     "@project-chip/matter-node.js": "0.9.2",
     "@project-chip/matter.js": "0.9.2",
@@ -59,7 +59,15 @@
     "branches": ["main"],
     "tagFormat": "v${version}",
     "plugins": [
-      "@semantic-release/commit-analyzer",
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "angular",
+          "releaseRules": [
+            { "type": "bump", "release": "patch" }
+          ]
+        }
+      ],
       "@semantic-release/release-notes-generator",
       "@semantic-release/npm",
       "@semantic-release/github"

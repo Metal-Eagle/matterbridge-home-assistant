@@ -4,7 +4,6 @@ import { HomeAssistantClient } from '../../home-assistant/home-assistant-client.
 import { WindowCoveringCluster, MatterbridgeDevice } from 'matterbridge';
 import { MatterbridgeDeviceCommands } from '../../util/matterbrigde-device-commands.js';
 
-
 export interface CoverControlAspectConfig {
   getValue: (entity: Entity) => number | undefined;
   goToLiftPercentage: {
@@ -33,17 +32,22 @@ export class CoverControlAspect extends MatterAspect<Entity> {
   }
 
   private goToLiftPercentage: MatterbridgeDeviceCommands['goToLiftPercentage'] = async ({
-    request: { position },
+    request: { liftPercent100thsValue },
   }: {
-    request: { position: number };
+    request: { liftPercent100thsValue: number };
   }) => {
-    this.log.debug(`FROM MATTER: ${this.entityId} changed value to ${position}`);
-    this.windowCoveringCluster!.setTargetPositionLiftPercent100thsAttribute(position);
+    this.log.debug(`FROM MATTER: ${this.entityId} changed value to ${liftPercent100thsValue}`);
+    this.windowCoveringCluster!.setTargetPositionLiftPercent100thsAttribute(liftPercent100thsValue);
 
     const [domain, service] = this.config.goToLiftPercentage.service.split('.');
-    await this.homeAssistantClient.callService(domain, service, this.config.goToLiftPercentage.data(position), {
-      entity_id: this.entityId,
-    });
+    await this.homeAssistantClient.callService(
+      domain,
+      service,
+      this.config.goToLiftPercentage.data(liftPercent100thsValue),
+      {
+        entity_id: this.entityId,
+      },
+    );
   };
 
   async update(state: Entity): Promise<void> {

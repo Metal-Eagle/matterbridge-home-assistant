@@ -14,7 +14,8 @@ export interface CoverControlAspectConfig {
 
 export class CoverControlAspect extends MatterAspect<Entity> {
   private get windowCoveringCluster() {
-    return this.device.getClusterServer(WindowCoveringCluster);
+    const serer = WindowCoveringCluster.with('Lift');
+    return this.device.getClusterServer(serer)!;
   }
 
   constructor(
@@ -37,7 +38,6 @@ export class CoverControlAspect extends MatterAspect<Entity> {
     request: { liftPercent100thsValue: number };
   }) => {
     this.log.debug(`FROM MATTER: ${this.entityId} changed value to ${liftPercent100thsValue}`);
-    this.windowCoveringCluster!.setTargetPositionLiftPercent100thsAttribute(liftPercent100thsValue);
 
     const [domain, service] = this.config.goToLiftPercentage.service.split('.');
     await this.homeAssistantClient.callService(
@@ -54,12 +54,15 @@ export class CoverControlAspect extends MatterAspect<Entity> {
     const windowControlClusterServer = this.windowCoveringCluster!;
 
     const position = this.config.getValue(state);
-    if (
-      position != null &&
-      windowControlClusterServer.getCurrentPositionLiftPercent100thsAttribute() / 100 !== position
-    ) {
+    if (windowControlClusterServer === undefined) throw new Error('Window covering cluster server is not defined');
+    if (windowControlClusterServer.getNumberOfActuationsLiftAttribute === undefined)
+      throw new Error('Number of actuations lift attribute is not defined');
+
+    const matterState = windowControlClusterServer?.getNumberOfActuationsLiftAttribute();
+
+    if (position != null && !state && matterState !== position) {
       this.log.debug(`FROM HA: ${this.entityId} changed value to ${position}`);
-      windowControlClusterServer.setCurrentPositionLiftPercent100thsAttribute(position * 100);
+      windowControlClusterServer.setNumberOfActuationsLiftAttribute(state);
     }
   }
 }
